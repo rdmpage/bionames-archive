@@ -1,7 +1,7 @@
 <?php
 
-require_once(dirname(__FILENAME__) . '/config.inc.php');
-require_once(dirname(__FILENAME__) . '/couchsimple.php');
+require_once(dirname(__FILE__) . '/config.inc.php');
+require_once(dirname(__FILE__) . '/couchsimple.php');
 
 //--------------------------------------------------------------------------------------------------
 function count_images($image_path)
@@ -32,6 +32,8 @@ function pdf_with_sha1($sha1)
 			
 	$r = json_decode($resp);
 	
+	//print_r($r);
+	
 	if (isset($r->error))
 	{
 	}
@@ -55,6 +57,11 @@ function pdf_with_url($url, $canonical_url = '')
 			);
 	$r = json_decode($resp);
 	
+	
+	//echo $config['couchdb'] 
+	//		. "/_design/pdf/_view/url?key=" . urlencode('"' . $url . '"') . "\n";
+	//print_r($r);	
+		
 	if (count($r->rows) == 1)
 	{
 		$sha1 = $r->rows[0]->id;
@@ -107,38 +114,54 @@ function pdf_to_images($sha1, $root = ".")
 
 	$pdf_filename = $sha1_path . '/' . $sha1 . '.pdf';
 	
-	// http://stackoverflow.com/questions/977540/convert-a-pdf-to-a-transparent-png-with-ghostscript
-	// Make images bigger to start with then resize to get better text quality
-	$dpi = 288;
-
-	//----------------------------------------------------------------------------------------------
-	// Pages 2-n
-	$command = $config['ghostscript']
-		. ' -dNOPAUSE '
-		. ' -sDEVICE=pngalpha '
-		. ' -sOutputFile=' . $images_path . '/page-%d.png'
-		. ' -r' . $dpi
-		. ' -dFirstPage=2'
-		. ' -q ' . $pdf_filename
-		. ' -c quit';	
+	if (1)
+	{
+		// http://stackoverflow.com/questions/977540/convert-a-pdf-to-a-transparent-png-with-ghostscript
+		// Make images bigger to start with then resize to get better text quality
+		$dpi = 288;
+	
+		//----------------------------------------------------------------------------------------------
+		// Pages 2-n
+		$command = $config['ghostscript']
+			. ' -dNOPAUSE '
+			. ' -sDEVICE=pngalpha '
+			. ' -sOutputFile=' . $images_path . '/page-%d.png'
+			. ' -r' . $dpi
+			. ' -dFirstPage=2'
+			. ' -q ' . $pdf_filename
+			. ' -c quit';	
+			
+		echo $command . "\n";
+		system($command);
+	
+		//----------------------------------------------------------------------------------------------
+		// http://stackoverflow.com/questions/2449486/can-ghostscript-to-start-numbering-pages-from-zero	
+		// First page (ensures it has zero offset)
+		$command = $config['ghostscript']
+			. ' -dNOPAUSE '
+			. ' -sDEVICE=pngalpha '
+			. ' -sOutputFile=' . $images_path . '/page-0.png'
+			. ' -r' . $dpi
+			. ' -dLastPage=1'
+			. ' -q ' . $pdf_filename
+			. ' -c quit';	
+			
+		echo $command . "\n";
+		system($command);
+	
+	}
+	else
+	{
+		// Imagemagick
+		$command = $config['convert']
+			. ' -density 300'
+			. ' ' . $pdf_filename
+			. ' ' . $images_path . '/page-%d.png';
 		
-	echo $command . "\n";
-	system($command);
-
-	//----------------------------------------------------------------------------------------------
-	// http://stackoverflow.com/questions/2449486/can-ghostscript-to-start-numbering-pages-from-zero	
-	// First page (ensures it has zero offset)
-	$command = $config['ghostscript']
-		. ' -dNOPAUSE '
-		. ' -sDEVICE=pngalpha '
-		. ' -sOutputFile=' . $images_path . '/page-0.png'
-		. ' -r' . $dpi
-		. ' -dLastPage=1'
-		. ' -q ' . $pdf_filename
-		. ' -c quit';	
+		echo $command . "\n";
+		system($command);
 		
-	echo $command . "\n";
-	system($command);
+	}
 	
 	
 	// count number of pages
@@ -272,6 +295,9 @@ function pdf_to_text($sha1, $root = ".")
 	global $config;
 
 	$sha1_path = create_path_from_sha1($sha1, $root);
+	
+	$pdf_filename = $sha1_path . '/' . $sha1 . '.pdf';
+	
 	
 	// Images folder
 	$images_path = $sha1_path . '/images';

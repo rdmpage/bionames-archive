@@ -104,6 +104,8 @@ class http_request
 		
 		$this->curl_result = curl_exec ($this->ch); 
 		
+		//echo $this->curl_result;
+		
 		if (curl_errno ($this->ch) != 0 )
 		{
 			$this->error_no = curl_errno ($this->ch);
@@ -124,6 +126,9 @@ class http_request
 			{
 				$this->data = substr($this->curl_result, $this->curl_info['header_size']);
 				
+				
+				//echo $data;
+				//exit();
 				
 				// Is it a PDF?
 				$pos = strpos ($this->data, '%PDF');
@@ -147,7 +152,7 @@ function default_display()
 {
 	echo '<form method="GET" action="pdfstore.php">
 			<input type="url" name="url" style="font-size:24px;" id="url" placeholder="URL for PDF file" value="" size="60"><br/>
-			<input type="url" name="canonical_url" style="font-size:24px;" id="canonical_url" placeholder="Canonical PDF URL" value="" size="60"><br/>
+			<input type="canonical_url" name="canonical_url" style="font-size:24px;" id="canonical_url" placeholder="Canonical PDF URL" value="" size="60"><br/>
 			<input type="checkbox" name="noredirect" value="1">No redirect<br />
 	<select name="format">
 		<option value="PDF">PDF</option>
@@ -172,6 +177,9 @@ function main()
 		exit(0);
 	}
 	
+	//print_r($_GET);
+	//exit();
+	
 	$format = 'pdf';
 	if (isset($_GET['format']))
 	{	
@@ -192,6 +200,8 @@ function main()
 	if (isset($_GET['url']))
 	{	
 		$url = $_GET['url'];
+		
+		//echo "|$url|";exit();
 		
 		// 
 		//$url = urldecode($url);
@@ -223,7 +233,7 @@ function main()
 			$request = new http_request();
 			$request->get($url);
 			
-			//print_r($request);
+			//print_r($request); exit();
 					
 			// Got something and it's a PDF (need to check this...)
 			if (($request->http_code == 200) && ($request->data != ''))
