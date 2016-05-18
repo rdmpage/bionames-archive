@@ -2,6 +2,12 @@
 
 config.inc.php
 
-issn/
-pdf/
+extra.txt
+file_sha.txt
+sha1.txt
+
+bhl-celsus.nhm.ac.uk
+issn
+junk/
+pdf
 public/
