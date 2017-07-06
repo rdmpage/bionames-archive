@@ -15,6 +15,8 @@ $filename = 'extra.txt';
 
 $shas=array();
 
+$force = true;
+
 $file_handle = fopen($filename, "r");
 
 while (!feof($file_handle)) 
@@ -31,9 +33,18 @@ while (!feof($file_handle))
 		
 		$filename = $parts[0];
 		$url = $parts[1];
+		
+		
+		if (!file_exists($filename))
+		{
+			echo "*** $filename not found *** \n";
+			exit();		
+		}
 	
 		echo "filename=$filename\n";
 		echo "url=$url\n";
+		
+		$sha1 = '';
 		
 		// Do we have this already?
 		$sha1 = pdf_with_url($url);
@@ -42,7 +53,7 @@ while (!feof($file_handle))
 		
 		echo "sha1='$sha1'\n"; //exit();
 		
-		if (!$sha1 || ($sha1 == ''))
+		if ((!$sha1 || ($sha1 == '')) || $force)
 		{	
 			// nope
 			
@@ -60,7 +71,7 @@ while (!feof($file_handle))
 			
 			// Do we have a file with this sha1?
 			$sha1 = pdf_with_sha1($pdf->sha1);
-			if ($sha1)
+			if ($sha1 && !$force)
 			{
 				echo "have\n";
 			}
@@ -78,7 +89,14 @@ while (!feof($file_handle))
 				print_r($pdf);
 				
 				// New PDF, so add to database					
-				$resp = $couch->send("POST", "/" . $config['couchdb'], json_encode($pdf));	
+				if (0)
+				{
+					$resp = $couch->send("POST", "/" . $config['couchdb'], json_encode($pdf));	
+				}
+				else
+				{
+					$resp = $couch->add_update_or_delete_document($pdf, $pdf->sha1);
+				}
 				
 				echo $resp . "\n";
 				
