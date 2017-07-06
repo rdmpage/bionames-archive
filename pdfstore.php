@@ -115,6 +115,8 @@ class http_request
 		{
 			$this->curl_info = curl_getinfo($this->ch);
 			
+			//print_r($curl_info);
+			
 			$this->header = substr($this->curl_result, 0, $this->curl_info['header_size']);
 			
 			//echo $url;

@@ -63,7 +63,7 @@ else
 	$file_handle = fopen($filename, "r");
 	
 	$force = true;
-	//$force = false;
+	$force = false;
 	
 	while (!feof($file_handle)) 
 	{

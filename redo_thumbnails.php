@@ -28,7 +28,7 @@ $sha1 = 'f31283390f4cec26c879a14334c39db1326a5aa2';
 $sha1 = '313f9f05d422b6947a390815a4cc3589ab43748b';
 $sha1 = 'efd9e3625d6261038c0aa81ee892e4c98e8085d1';
 
-$sha1 = '4d35c0e3576f9c9a62a494c8dcd32901be0b83f0';
+$sha1 = '0937d050a0765cd030366cd3eda5ae2b58be5dd2';
 
 {
 	pdf_to_thumbnails($sha1, 'pdf');
