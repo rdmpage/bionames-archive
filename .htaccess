@@ -3,6 +3,8 @@ RewriteEngine on
 #RewriteBase /~rpage/archive/
 RewriteBase /bionames-archive/
 
+RedirectMatch 404 /\.git
+
 #---------------------------------------------------------------------------------------------------
 # DocumentCloud PDF
 
