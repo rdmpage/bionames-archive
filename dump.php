@@ -42,7 +42,7 @@ while (!$done)
 	
 	// debug
 	//echo '[' . $skip . '(' . count($obj->rows) . ')]';
-	$done = ($skip > 100);
+	//$done = ($skip > 100);
 	
 }
 

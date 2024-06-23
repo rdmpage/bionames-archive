@@ -16,8 +16,13 @@ $filename = 'extra.txt';
 $shas=array();
 
 $force = true;
+//$force = false;
 
 $file_handle = fopen($filename, "r");
+
+$zerobytes = array();
+
+$sqls = array();
 
 while (!feof($file_handle)) 
 {
@@ -29,6 +34,7 @@ while (!feof($file_handle))
 	}
 	else
 	{
+		$empty = false;
 		$parts = explode("\t", $line);
 		
 		$filename = $parts[0];
@@ -38,77 +44,108 @@ while (!feof($file_handle))
 		if (!file_exists($filename))
 		{
 			echo "*** $filename not found *** \n";
-			exit();		
-		}
-	
-		echo "filename=$filename\n";
-		echo "url=$url\n";
-		
-		$sha1 = '';
-		
-		// Do we have this already?
-		$sha1 = pdf_with_url($url);
-		
-		//print_r($sha1);
-		
-		echo "sha1='$sha1'\n"; //exit();
-		
-		if ((!$sha1 || ($sha1 == '')) || $force)
-		{	
-			// nope
-			
-			$pdf = new stdclass;
-			$pdf->urls = array();
-			$pdf->urls[] = $url;
-			
-			// sha1 is sha1 of local file
-			$pdf->sha1 = sha1($filename);
-			$pdf->_id = $pdf->sha1;
-			
-			echo $pdf->sha1 . "\n";
-			
-			$shas[] = $pdf->sha1;
-			
-			// Do we have a file with this sha1?
-			$sha1 = pdf_with_sha1($pdf->sha1);
-			if ($sha1 && !$force)
-			{
-				echo "have\n";
-			}
-			else
-			{			
-				// New PDF
-				$pdf->relative_path = sha1_to_path_string($pdf->sha1);
-				$pdf->filepath = create_path_from_sha1($pdf->sha1, $config['pdf_file_root']);
-				$pdf->filename = $pdf->sha1 . '.pdf';
 				
-				// Copy PDF 
-				echo $filename . ' ' .  $pdf->filepath. '/' . $pdf->filename. "\n";
-				copy ($filename, $pdf->filepath. '/' . $pdf->filename);
-							
-				print_r($pdf);
-				
-				// New PDF, so add to database					
-				if (0)
-				{
-					$resp = $couch->send("POST", "/" . $config['couchdb'], json_encode($pdf));	
-				}
-				else
-				{
-					$resp = $couch->add_update_or_delete_document($pdf, $pdf->sha1);
-				}
-				
-				echo $resp . "\n";
-				
-			}
 		}
 		else
 		{
-			echo "done already!\n";
+		
+			// is it > 0
+			if (filesize($filename) == 0)
+			{
+				echo "*** $filename empty *** \n";
+				$empty = true;
+			}
+		
+	
+			echo "filename=$filename\n";
+			echo "url=$url\n";
+		
+			$sha1 = '';
+		
+			// Do we have this already?
+			$sha1 = pdf_with_url($url);
+		
+			//print_r($sha1);
+		
+			echo "sha1='$sha1'\n"; //exit();
+		
+			if ($empty)
+			{
+				$zerobytes[] = $sha1;
+			}
+			else
+			{
+		
+				if ((!$sha1 || ($sha1 == '')) || $force)
+				{	
+					// nope
+			
+					$pdf = new stdclass;
+					$pdf->urls = array();
+					$pdf->urls[] = $url;
+			
+					// sha1 is sha1 of local file
+					$pdf->sha1 = sha1($filename);
+					$pdf->_id = $pdf->sha1;
+			
+					echo $pdf->sha1 . "\n";
+			
+					$shas[] = $pdf->sha1;
+			
+					// Do we have a file with this sha1?
+					$sha1 = pdf_with_sha1($pdf->sha1);
+					if ($sha1 && !$force)
+					{
+						echo "have\n";
+					}
+					else
+					{			
+						// New PDF
+						$pdf->relative_path = sha1_to_path_string($pdf->sha1);
+						$pdf->filepath = create_path_from_sha1($pdf->sha1, $config['pdf_file_root']);
+						$pdf->filename = $pdf->sha1 . '.pdf';
+					
+						$sql = 'REPLACE INTO sha1(sha1,pdf) VALUES("' . $pdf->sha1 . '", "' . $url . '");';
+						$sqls[] = $sql;
+				
+						// Copy PDF 
+						echo $filename . ' ' .  $pdf->filepath. '/' . $pdf->filename. "\n";
+						copy ($filename, $pdf->filepath. '/' . $pdf->filename);
+							
+						print_r($pdf);
+				
+						// New PDF, so add to database					
+						if (0)
+						{
+							$resp = $couch->send("POST", "/" . $config['couchdb'], json_encode($pdf));	
+						}
+						else
+						{
+							$resp = $couch->add_update_or_delete_document($pdf, $pdf->sha1);
+						}
+				
+						echo $resp . "\n";
+				
+					}
+				}
+				else
+				{
+					echo "done already!\n";
+				}
+			}
 		}
 	}
 }
 
 file_put_contents('file_sha.txt', join("\n", $shas));
+
+print_r($zerobytes);
+
+echo "\n";
+echo join("\n", $sqls);
+echo "\n";
+
+
+
 
 ?>

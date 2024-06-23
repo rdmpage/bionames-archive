@@ -30,6 +30,8 @@ $sha1 = 'efd9e3625d6261038c0aa81ee892e4c98e8085d1';
 
 $sha1 = '0937d050a0765cd030366cd3eda5ae2b58be5dd2';
 
+$sha1 = 'b0937836f5dfb3a1feac3e961e23fcaaef988d4e';
+
 {
 	pdf_to_thumbnails($sha1, 'pdf');
 }

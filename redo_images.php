@@ -29,9 +29,9 @@ foreach ($obj->rows as $row)
 
 
 
-$shas = array('01857b01563fd7886227b12881e3386a3e93f6c7');
+$shas = array('1dd439abc519f28fbd71de519b44d3483775a28d');
 
-if (0)
+if (1)
 {
 $force = true;
 foreach ($shas as $sha1)
@@ -69,22 +69,24 @@ else
 	{
 		$sha1 = trim(fgets($file_handle));
 		
-		if ($force)
-		{
-			pdf_to_images($sha1, 'pdf');
-		}
-		else
-		{
-			if (have_pdf_images($sha1, 'pdf'))
+		
+			if ($force)
 			{
-				echo "Done!\n";
+				pdf_to_images($sha1, 'pdf');
 			}
 			else
 			{
-				//echo "$sha1\n";
-				pdf_to_images($sha1, 'pdf');
+				if (have_pdf_images($sha1, 'pdf'))
+				{
+					echo "Done!\n";
+				}
+				else
+				{
+					//echo "$sha1\n";
+					pdf_to_images($sha1, 'pdf');
+				}
 			}
-		}
+		
 	}
 	
 }
